@@ -81,25 +81,25 @@ public class Client {
         System.out.println("Delete response: " + response);
     }
 
-    // Metodo centralizzato per inviare richieste e gestire risposte
-    @SuppressWarnings("unchecked")
-    private <T> T sendRequest(HttpRequest request, Class<?> itemClass) throws Exception {
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        int status = response.statusCode();
-        System.out.println("Request: " + request.method() + " " + request.uri());
-        System.out.println("Status: " + status);
+// Metodo centralizzato per inviare richieste e gestire risposte
+@SuppressWarnings("unchecked")
+private <T> T sendRequest(HttpRequest request, Class<?> itemClass) throws Exception {
+    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    int status = response.statusCode();
+    System.out.println("Request: " + request.method() + " " + request.uri());
+    System.out.println("Status: " + status);
 
-        if (status >= 200 && status < 300) {
-            if (request.method().equals("GET") && !request.uri().toString().contains("getBooksWithAuthors")) {
-                return (T) XmlUtils.unmarshal(ResponseWrapper.class, Response.body(), BOOK.class);
-            } else if (request.uri().toString().contains("getBooksWithAuthors")) {
-                return (T) XmlUtils.unmarshal(ResponseWrapper.class, Response.body(), BookWithAuthor.class);
-            } else {
-                return (T) XmlUtils.unmarshal(Response.class, response.body());
-            }
+    if (status >= 200 && status < 300) {
+        if (request.method().equals("GET") && !request.uri().toString().contains("getBooksWithAuthors")) {
+            return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), BOOK.class);
+        } else if (request.uri().toString().contains("getBooksWithAuthors")) {
+            return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), BookWithAuthor.class);
         } else {
-            System.out.println("Error: " + response.body());
-            throw new Exception("Request failed with status: " + status);
+            return (T) XmlUtils.unmarshal(Response.class, response.body());
         }
+    } else {
+        System.out.println("Error: " + response.body());
+        throw new Exception("Request failed with status: " + status);
     }
+}
 }
