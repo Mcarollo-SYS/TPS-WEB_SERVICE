@@ -1,14 +1,16 @@
 package web_service.utils;
 
-import web_service.model.BOOK;
-import web_service.model.BookWithAuthor;
-import web_service.model.Response;
-import web_service.model.ResponseWrapper;
-
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import web_service.model.Brand;
+import web_service.model.Car;
+import web_service.model.CarWithDetails;
+import web_service.model.Customer;
+import web_service.model.Response;
+import web_service.model.ResponseWrapper;
 
 public class Client {
     private String baseUrl;
@@ -19,87 +21,93 @@ public class Client {
         this.client = HttpClient.newHttpClient();
     }
 
-    // GET: Lista dei libri
-    public void getBooks() throws Exception {
+    // GET: Lista delle auto
+    public void getCars() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=getBooks"))
+                .uri(URI.create(baseUrl + "?action=getCars"))
                 .GET().build();
-        ResponseWrapper<BOOK> response = sendRequest(request, BOOK.class);
-        System.out.println("Books: " + response.getItems());
+        ResponseWrapper<Car> response = sendRequest(request, Car.class);
+        System.out.println(response.getItems());
     }
 
-    // GET: Lista degli autori
-    public void getAuthors() throws Exception {
+    // GET: Lista delle marche
+    public void getBrands() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=getAuthors"))
+                .uri(URI.create(baseUrl + "?action=getBrands"))
                 .GET().build();
-        ResponseWrapper<BOOK> response = sendRequest(request, BOOK.class); // Usiamo Book per semplicità
-        System.out.println("Authors: " + response.getItems());
+        ResponseWrapper<Brand> response = sendRequest(request, Brand.class);
+        System.out.println(response.getItems());
     }
 
-    // GET: Libri con autori (JOIN)
-    public void getBooksWithAuthors() throws Exception {
+    // GET: Lista dei clienti
+    public void getCustomers() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=getBooksWithAuthors"))
+                .uri(URI.create(baseUrl + "?action=getCustomers"))
                 .GET().build();
-        ResponseWrapper<BookWithAuthor> response = sendRequest(request, BookWithAuthor.class);
-        System.out.println("Books with Authors: " + response.getItems());
+        ResponseWrapper<Customer> response = sendRequest(request, Customer.class);
+        System.out.println(response.getItems());
     }
 
-    // POST: Crea un nuovo libro
-    public void createBook(String title, int authorId, int publicationYear) throws Exception {
-        BOOK book = new BOOK(0, title, authorId, publicationYear);
-        String body = XmlUtils.marshal(book);
+    // GET: Auto con dettagli (JOIN)
+    public void getCarsWithDetails() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=createBook"))
+                .uri(URI.create(baseUrl + "?action=getCarsWithDetails"))
+                .GET().build();
+        ResponseWrapper<CarWithDetails> response = sendRequest(request, CarWithDetails.class);
+        System.out.println(response.getItems());
+    }
+
+    // POST: Crea una nuova auto
+    public void createCar(String model, int brandId, int year, double price, String color) throws Exception {
+        Car car = new Car(0, model, brandId, year, price, color);
+        String body = XmlUtils.marshal(car);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "?action=createCar"))
                 .header("Content-Type", "application/xml")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
         Response response = sendRequest(request, Response.class);
-        System.out.println("Create response: " + response);
+        System.out.println(response);
     }
 
-    // PUT: Aggiorna un libro
-    public void updateBook(int id, String title) throws Exception {
-        BOOK book = new BOOK(id, title, 0, 0);
-        String body = XmlUtils.marshal(book);
+    // PUT: Aggiorna un'auto
+    public void updateCar(int id, String model, double price, String color) throws Exception {
+        Car car = new Car(id, model, 0, 0, price, color);
+        String body = XmlUtils.marshal(car);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=updateBook&id=" + id))
+                .uri(URI.create(baseUrl + "?action=updateCar&id=" + id))
                 .header("Content-Type", "application/xml")
                 .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .build();
         Response response = sendRequest(request, Response.class);
-        System.out.println("Update response: " + response);
+        System.out.println(response);
     }
 
-    // DELETE: Elimina un libro
-    public void deleteBook(int id) throws Exception {
+    // DELETE: Elimina un'auto
+    public void deleteCar(int id) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "?action=deleteBook&id=" + id))
+                .uri(URI.create(baseUrl + "?action=deleteCar&id=" + id))
                 .DELETE().build();
         Response response = sendRequest(request, Response.class);
-        System.out.println("Delete response: " + response);
+        System.out.println(response);
     }
 
-// Metodo centralizzato per inviare richieste e gestire risposte
-@SuppressWarnings("unchecked")
-private <T> T sendRequest(HttpRequest request, Class<?> itemClass) throws Exception {
-    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-    int status = response.statusCode();
-    System.out.println("Request: " + request.method() + " " + request.uri());
-    System.out.println("Status: " + status);
+    // Metodo centralizzato per inviare richieste e gestire risposte
+    @SuppressWarnings("unchecked")
+    private <T> T sendRequest(HttpRequest request, Class<?> itemClass) throws Exception {
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        int status = response.statusCode();
+        System.out.println("Status: " + status);
 
-    if (status >= 200 && status < 300) {
-        if (request.method().equals("GET") && !request.uri().toString().contains("getBooksWithAuthors")) {
-            return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), BOOK.class);
-        } else if (request.uri().toString().contains("getBooksWithAuthors")) {
-            return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), BookWithAuthor.class);
+        if (status >= 200 && status < 300) {
+            if (request.method().equals("GET")) {
+                return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), itemClass);
+            } else {
+                return (T) XmlUtils.unmarshal(Response.class, response.body());
+            }
         } else {
-            return (T) XmlUtils.unmarshal(Response.class, response.body());
+            System.out.println(response.body());
+            throw new Exception("Request failed: " + status);
         }
-    } else {
-        System.out.println("Error: " + response.body());
-        throw new Exception("Request failed with status: " + status);
     }
-}
 }

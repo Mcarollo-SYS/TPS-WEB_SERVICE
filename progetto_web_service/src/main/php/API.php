@@ -1,145 +1,132 @@
 <?php
 /*
- * Web Service API per la gestione di una biblioteca
- * Operazioni disponibili:
- * - GET /api.php?action=getBooks : Lista tutti i libri (Read)
- * - GET /api.php?action=getAuthors : Lista tutti gli autori (Read)
- * - GET /api.php?action=getBooksWithAuthors : Lista libri con autori (Join)
- * - POST /api.php?action=createBook : Crea un nuovo libro
- * - PUT /api.php?action=updateBook&id={id} : Aggiorna un libro esistente
- * - DELETE /api.php?action=deleteBook&id={id} : Elimina un libro
- * Parametri opzionali:
- * - format=xml (default) o format=json per scegliere il formato della risposta
+ * Web Service API per un concessionario di auto
+ * - GET ?action=getCars : Lista auto
+ * - GET ?action=getBrands : Lista marche
+ * - GET ?action=getCustomers : Lista clienti
+ * - GET ?action=getCarsWithDetails : Lista auto con marche e clienti
+ * - POST ?action=createCar : Crea auto
+ * - PUT ?action=updateCar&id={id} : Aggiorna auto
+ * - DELETE ?action=deleteCar&id={id} : Elimina auto
  */
 
 include 'DB.php';
+header("Content-Type: application/xml; charset=utf-8");
 
-// Impostazione header dinamico per XML o JSON
-$format = $_GET['format'] ?? 'xml'; // Default XML
-header("Content-Type: " . ($format === 'json' ? 'application/json' : 'application/xml') . "; charset=utf-8");
-
-// Funzione per inviare risposte con codici di stato
-function sendResponse($data, $status = 200, $format = 'xml') {
-    http_response_code($status);
-    if ($format === 'json') {
-        echo json_encode($data);
-    } else {
-        $xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?><response/>");
-        arrayToXml($data, $xml);
-        echo $xml->asXML();
-    }
-    exit;
-}
-
-// Funzione per convertire array in XML
-function arrayToXml($data, &$xml) {
-    foreach ($data as $key => $value) {
-        if (is_array($value)) {
-            $subnode = $xml->addChild(is_numeric($key) ? 'item' : $key);
-            arrayToXml($value, $subnode);
-        } else {
-            $xml->addChild($key, htmlspecialchars($value));
-        }
-    }
-}
-
-// Funzioni per ottenere i dati
-function getBooks() {
-    global $conn;
-    $sql = "SELECT * FROM books";
-    $result = $conn->query($sql);
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-function getAuthors() {
-    global $conn;
-    $sql = "SELECT * FROM authors";
-    $result = $conn->query($sql);
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-function getBooksWithAuthors() {
-    global $conn;
-    $sql = "SELECT books.title, authors.name FROM books JOIN authors ON books.author_id = authors.author_id";
-    $result = $conn->query($sql);
-    return $result->fetch_all(MYSQLI_ASSOC);
-}
-
-// Gestione delle richieste
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? null;
 
+$xml = new SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?><response/>");
+
 switch ($method) {
     case 'GET':
-        if ($action === 'getBooks') {
-            sendResponse(getBooks(), 200, $format);
-        } elseif ($action === 'getAuthors') {
-            sendResponse(getAuthors(), 200, $format);
-        } elseif ($action === 'getBooksWithAuthors') {
-            sendResponse(getBooksWithAuthors(), 200, $format);
+        if ($action == 'getCars') {
+            $result = $conn->query("SELECT * FROM cars");
+            foreach ($result->fetch_all(MYSQLI_ASSOC) as $row) {
+                $item = $xml->addChild('item');
+                foreach ($row as $key => $value) $item->addChild($key, htmlspecialchars($value));
+            }
+            http_response_code(200);
+        } elseif ($action == 'getBrands') {
+            $result = $conn->query("SELECT * FROM brands");
+            foreach ($result->fetch_all(MYSQLI_ASSOC) as $row) {
+                $item = $xml->addChild('item');
+                foreach ($row as $key => $value) $item->addChild($key, htmlspecialchars($value));
+            }
+            http_response_code(200);
+        } elseif ($action == 'getCustomers') {
+            $result = $conn->query("SELECT * FROM customers");
+            foreach ($result->fetch_all(MYSQLI_ASSOC) as $row) {
+                $item = $xml->addChild('item');
+                foreach ($row as $key => $value) $item->addChild($key, htmlspecialchars($value));
+            }
+            http_response_code(200);
+        } elseif ($action == 'getCarsWithDetails') {
+            $result = $conn->query("SELECT cars.model, cars.year, cars.price, cars.color, brands.name AS brand_name, customers.first_name, customers.last_name 
+                                   FROM cars 
+                                   LEFT JOIN brands ON cars.brand_id = brands.id 
+                                   LEFT JOIN customers ON cars.id = customers.car_id");
+            foreach ($result->fetch_all(MYSQLI_ASSOC) as $row) {
+                $item = $xml->addChild('item');
+                foreach ($row as $key => $value) $item->addChild($key, htmlspecialchars($value));
+            }
+            http_response_code(200);
         } else {
-            sendResponse(['error' => 'Invalid action'], 404, $format);
+            $xml->addChild('error', 'Invalid action');
+            http_response_code(404);
         }
         break;
 
     case 'POST':
-        if ($action === 'createBook') {
-            $input = ($format === 'xml') ? simplexml_load_file("php://input") : json_decode(file_get_contents("php://input"), true);
-            $title = $input->title ?? $input['title'];
-            $author_id = $input->author_id ?? $input['author_id'];
-            $publication_year = $input->publication_year ?? $input['publication_year'];
-
-            if ($title && $author_id) {
-                $sql = "INSERT INTO books (title, author_id, publication_year) VALUES (?, ?, ?)";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("sii", $title, $author_id, $publication_year);
+        if ($action == 'createCar') {
+            $input = simplexml_load_file("php://input");
+            $model = (string)$input->model;
+            $brand_id = (int)$input->brand_id;
+            $year = (int)$input->year;
+            $price = (float)$input->price;
+            $color = (string)$input->color;
+            if ($model && $brand_id) {
+                $stmt = $conn->prepare("INSERT INTO cars (model, brand_id, year, price, color) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("siids", $model, $brand_id, $year, $price, $color);
                 $stmt->execute();
-                sendResponse(['message' => 'Book created', 'id' => $conn->insert_id], 201, $format);
+                $xml->addChild('message', 'Car created');
+                $xml->addChild('id', $conn->insert_id);
+                http_response_code(201);
             } else {
-                sendResponse(['error' => 'Missing required fields'], 400, $format);
+                $xml->addChild('error', 'Missing required fields');
+                http_response_code(400);
             }
         } else {
-            sendResponse(['error' => 'Invalid action'], 404, $format);
+            $xml->addChild('error', 'Invalid action');
+            http_response_code(404);
         }
         break;
 
     case 'PUT':
-        if ($action === 'updateBook' && $id) {
-            $input = ($format === 'xml') ? simplexml_load_file("php://input") : json_decode(file_get_contents("php://input"), true);
-            $title = $input->title ?? $input['title'];
-
-            if ($title) {
-                $sql = "UPDATE books SET title = ? WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("si", $title, $id);
+        if ($action == 'updateCar' && $id) {
+            $input = simplexml_load_file("php://input");
+            $model = (string)$input->model;
+            $price = (float)$input->price;
+            $color = (string)$input->color;
+            if ($model) {
+                $stmt = $conn->prepare("UPDATE cars SET model = ?, price = ?, color = ? WHERE id = ?");
+                $stmt->bind_param("sdsi", $model, $price, $color, $id);
                 $stmt->execute();
-                sendResponse(['message' => 'Book updated'], 200, $format);
+                $xml->addChild('message', 'Car updated');
+                http_response_code(200);
             } else {
-                sendResponse(['error' => 'Missing title'], 400, $format);
+                $xml->addChild('error', 'Missing model');
+                http_response_code(400);
             }
         } else {
-            sendResponse(['error' => 'Invalid action or missing ID'], 404, $format);
+            $xml->addChild('error', 'Invalid action or missing ID');
+            http_response_code(404);
         }
         break;
 
     case 'DELETE':
-        if ($action === 'deleteBook' && $id) {
-            $sql = "DELETE FROM books WHERE id = ?";
-            $stmt = $conn->prepare($sql);
+        if ($action == 'deleteCar' && $id) {
+            $stmt = $conn->prepare("DELETE FROM cars WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
             if ($stmt->affected_rows > 0) {
-                sendResponse(['message' => 'Book deleted'], 200, $format);
+                $xml->addChild('message', 'Car deleted');
+                http_response_code(200);
             } else {
-                sendResponse(['error' => 'Book not found'], 404, $format);
+                $xml->addChild('error', 'Car not found');
+                http_response_code(404);
             }
         } else {
-            sendResponse(['error' => 'Invalid action or missing ID'], 404, $format);
+            $xml->addChild('error', 'Invalid action or missing ID');
+            http_response_code(404);
         }
         break;
 
     default:
-        sendResponse(['error' => 'Method not allowed'], 405, $format);
+        $xml->addChild('error', 'Method not allowed');
+        http_response_code(405);
 }
+
+echo $xml->asXML();
 ?>
