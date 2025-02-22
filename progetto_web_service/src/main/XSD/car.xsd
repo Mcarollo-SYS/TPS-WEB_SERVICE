@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           targetNamespace="http://example.com/car"
+           xmlns:tns="http://example.com/car">
+
+    <!-- Definizione dell'elemento radice "item" -->
+    <xs:element name="item" type="tns:CarType"/>
+
+    <!-- Definizione del tipo complesso "CarType" -->
+    <xs:complexType name="CarType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:int" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="model" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="brand_id" type="xs:int" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="year" type="xs:int" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="price" type="xs:double" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="color" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
