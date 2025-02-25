@@ -26,7 +26,7 @@ public class Client {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCars"))
                 .GET().build();
-        ResponseWrapper<Car> response = sendRequest(request, Car.class);
+        ResponseWrapper<Car> response = sendGetRequest(request, Car.class);
         System.out.println(response.getItems());
     }
 
@@ -35,7 +35,7 @@ public class Client {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getBrands"))
                 .GET().build();
-        ResponseWrapper<Brand> response = sendRequest(request, Brand.class);
+        ResponseWrapper<Brand> response = sendGetRequest(request, Brand.class);
         System.out.println(response.getItems());
     }
 
@@ -44,7 +44,7 @@ public class Client {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCustomers"))
                 .GET().build();
-        ResponseWrapper<Customer> response = sendRequest(request, Customer.class);
+        ResponseWrapper<Customer> response = sendGetRequest(request, Customer.class);
         System.out.println(response.getItems());
     }
 
@@ -53,7 +53,7 @@ public class Client {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCarsWithDetails"))
                 .GET().build();
-        ResponseWrapper<CarWithDetails> response = sendRequest(request, CarWithDetails.class);
+        ResponseWrapper<CarWithDetails> response = sendGetRequest(request, CarWithDetails.class);
         System.out.println(response.getItems());
     }
 
@@ -66,7 +66,7 @@ public class Client {
                 .header("Content-Type", "application/xml")
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
-        Response response = sendRequest(request, Response.class);
+        Response response = sendNonGetRequest(request);
         System.out.println(response);
     }
 
@@ -79,7 +79,7 @@ public class Client {
                 .header("Content-Type", "application/xml")
                 .PUT(HttpRequest.BodyPublishers.ofString(body))
                 .build();
-        Response response = sendRequest(request, Response.class);
+        Response response = sendNonGetRequest(request);
         System.out.println(response);
     }
 
@@ -88,23 +88,34 @@ public class Client {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=deleteCar&id=" + id))
                 .DELETE().build();
-        Response response = sendRequest(request, Response.class);
+        Response response = sendNonGetRequest(request);
         System.out.println(response);
     }
 
-    // Metodo centralizzato per inviare richieste e gestire risposte
+    // Metodo per richieste GET con ResponseWrapper<T>
     @SuppressWarnings("unchecked")
-    private <T> T sendRequest(HttpRequest request, Class<?> itemClass) throws Exception {
+    private <T> ResponseWrapper<T> sendGetRequest(HttpRequest request, Class<T> itemClass) throws Exception {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         int status = response.statusCode();
         System.out.println("Status: " + status);
 
         if (status >= 200 && status < 300) {
-            if (request.method().equals("GET")) {
-                return (T) XmlUtils.unmarshal(ResponseWrapper.class, response.body(), itemClass);
-            } else {
-                return (T) XmlUtils.unmarshal(Response.class, response.body());
-            }
+            // Deserializza direttamente in ResponseWrapper (JAXB deve inferire T dal XML)
+            return (ResponseWrapper<T>) XmlUtils.unmarshal(ResponseWrapper.class, response.body());
+        } else {
+            System.out.println(response.body());
+            throw new Exception("Request failed: " + status);
+        }
+    }
+
+    // Metodo per richieste non-GET (POST, PUT, DELETE) con Response
+    private Response sendNonGetRequest(HttpRequest request) throws Exception {
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        int status = response.statusCode();
+        System.out.println("Status: " + status);
+
+        if (status >= 200 && status < 300) {
+            return XmlUtils.unmarshal(Response.class, response.body());
         } else {
             System.out.println(response.body());
             throw new Exception("Request failed: " + status);

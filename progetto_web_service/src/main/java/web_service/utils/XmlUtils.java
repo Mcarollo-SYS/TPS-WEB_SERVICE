@@ -8,7 +8,6 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import web_service.model.ResponseWrapper;
 
 public class XmlUtils {
     private XmlUtils() {
@@ -31,12 +30,4 @@ public class XmlUtils {
         return (T) unmarshaller.unmarshal(stream);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> ResponseWrapper<T> unmarshal(Class<?> wrapperClass, String xml, Class<T> itemClass) throws JAXBException {
-        JAXBContext context = JAXBContext.newInstance(wrapperClass);
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-        byte[] bytes = xml.getBytes(StandardCharsets.UTF_8);
-        ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
-        return (ResponseWrapper<T>) unmarshaller.unmarshal(stream);
-    }
 }
