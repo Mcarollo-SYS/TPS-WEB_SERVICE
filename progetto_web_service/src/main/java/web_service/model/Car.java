@@ -2,13 +2,22 @@ package web_service.model;
 
 import static jakarta.xml.bind.annotation.XmlAccessType.FIELD;
 import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute; // Aggiunto
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "item")
 @XmlAccessorType(FIELD)
 public class Car {
-    @XmlElement(name = "id")
+    public Car(int id, String model, int brandId, int year, double price, String color) {
+        this.id = id;
+        this.model = model;
+        this.brand_id = brandId;
+        this.year = year;
+        this.price = price;
+        this.color = color;
+    }
+    @XmlAttribute(name = "id") 
     private int id;
 
     @XmlElement(name = "model")
@@ -26,17 +35,8 @@ public class Car {
     @XmlElement(name = "color")
     private String color;
 
-    public Car() {}
-
-    public Car(int id, String model, int brandId, int year, double price, String color) {
-        this.id = id;
-        this.model = model;
-        this.brand_id = brandId;
-        this.year = year;
-        this.price = price;
-        this.color = color;
+    public Car() {
     }
-
     public int getId() {
         return id;
     }

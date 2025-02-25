@@ -8,6 +8,12 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "item")
 @XmlAccessorType(FIELD)
 public class Brand {
+
+    public Brand(int id, String name, String country) {
+        this.id = id;
+        this.name = name;
+        this.country = country;
+    }
     @XmlElement(name = "id")
     private int id;
 
@@ -17,14 +23,8 @@ public class Brand {
     @XmlElement(name = "country")
     private String country;
 
-    public Brand() {}
-
-    public Brand(int id, String name, String country) {
-        this.id = id;
-        this.name = name;
-        this.country = country;
+    public Brand() {
     }
-
     public int getId() {
         return id;
     }
