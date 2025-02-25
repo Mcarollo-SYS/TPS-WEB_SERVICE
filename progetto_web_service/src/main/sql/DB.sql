@@ -26,7 +26,6 @@ CREATE TABLE customers (
     FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL
 );
 
--- Dati di esempio
 INSERT INTO brands (name, country) VALUES 
 ('Toyota', 'Japan'), 
 ('Ford', 'USA');

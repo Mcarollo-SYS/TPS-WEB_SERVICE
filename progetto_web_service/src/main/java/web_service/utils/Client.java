@@ -21,7 +21,6 @@ public class Client {
         this.client = HttpClient.newHttpClient();
     }
 
-    // GET: Lista delle auto
     public void getCars() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCars"))
@@ -29,8 +28,6 @@ public class Client {
         ResponseWrapper<Car> response = sendGetRequest(request, Car.class);
         System.out.println(response.getItems());
     }
-
-    // GET: Lista delle marche
     public void getBrands() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getBrands"))
@@ -38,8 +35,6 @@ public class Client {
         ResponseWrapper<Brand> response = sendGetRequest(request, Brand.class);
         System.out.println(response.getItems());
     }
-
-    // GET: Lista dei clienti
     public void getCustomers() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCustomers"))
@@ -48,7 +43,6 @@ public class Client {
         System.out.println(response.getItems());
     }
 
-    // GET: Auto con dettagli (JOIN)
     public void getCarsWithDetails() throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=getCarsWithDetails"))
@@ -57,7 +51,6 @@ public class Client {
         System.out.println(response.getItems());
     }
 
-    // POST: Crea una nuova auto
     public void createCar(String model, int brandId, int year, double price, String color) throws Exception {
         Car car = new Car(0, model, brandId, year, price, color);
         String body = XmlUtils.marshal(car);
@@ -70,7 +63,6 @@ public class Client {
         System.out.println(response);
     }
 
-    // PUT: Aggiorna un'auto
     public void updateCar(int id, String model, double price, String color) throws Exception {
         Car car = new Car(id, model, 0, 0, price, color);
         String body = XmlUtils.marshal(car);
@@ -83,7 +75,6 @@ public class Client {
         System.out.println(response);
     }
 
-    // DELETE: Elimina un'auto
     public void deleteCar(int id) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "?action=deleteCar&id=" + id))
@@ -92,23 +83,18 @@ public class Client {
         System.out.println(response);
     }
 
-    // Metodo per richieste GET con ResponseWrapper<T>
-    @SuppressWarnings("unchecked")
     private <T> ResponseWrapper<T> sendGetRequest(HttpRequest request, Class<T> itemClass) throws Exception {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         int status = response.statusCode();
         System.out.println("Status: " + status);
 
         if (status >= 200 && status < 300) {
-            // Deserializza direttamente in ResponseWrapper (JAXB deve inferire T dal XML)
             return (ResponseWrapper<T>) XmlUtils.unmarshal(ResponseWrapper.class, response.body());
         } else {
             System.out.println(response.body());
             throw new Exception("Request failed: " + status);
         }
     }
-
-    // Metodo per richieste non-GET (POST, PUT, DELETE) con Response
     private Response sendNonGetRequest(HttpRequest request) throws Exception {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         int status = response.statusCode();

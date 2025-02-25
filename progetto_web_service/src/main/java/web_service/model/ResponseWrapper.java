@@ -10,8 +10,12 @@ public class ResponseWrapper<T> {
     private List<T> items;
 
     @XmlElement(name = "item")
-    public List<T> getItems() { return items; }
-    public void setItems(List<T> items) { this.items = items; }
+    public List<T> getItems() {
+         return items;
+    }
+    public void setItems(List<T> items) {
+         this.items = items; 
+    }
 
     @Override
     public String toString() {

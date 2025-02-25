@@ -4,10 +4,9 @@
            targetNamespace="http://example.com/customer"
            xmlns:tns="http://example.com/customer">
 
-    <!-- Definizione dell'elemento radice "item" -->
     <xs:element name="item" type="tns:CustomerType"/>
 
-    <!-- Definizione del tipo complesso "CustomerType" -->
+
     <xs:complexType name="CustomerType">
         <xs:sequence>
             <xs:element name="id" type="xs:int" minOccurs="1" maxOccurs="1"/>
