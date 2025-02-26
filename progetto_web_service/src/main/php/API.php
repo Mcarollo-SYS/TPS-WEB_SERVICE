@@ -1,6 +1,5 @@
 <?php
 /*
- * Web Service API per un concessionario di auto
  * - GET ?action=getCars : Lista auto
  * - GET ?action=getBrands : Lista marche
  * - GET ?action=getCustomers : Lista clienti
@@ -10,13 +9,13 @@
  * - DELETE ?action=deleteCar&id={id} : Elimina auto
  */
 
-include 'DB.php'; // Connessione al database (assumo sia corretta)
+include 'DB.php'; 
 header('Content-Type: application/xml; charset=utf-8');
 
-// Inizializza l'elemento radice XML
+// Radice XML
 $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><response/>');
 
-// Ottieni metodo HTTP e parametri
+//  parametri HTTP
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? null;

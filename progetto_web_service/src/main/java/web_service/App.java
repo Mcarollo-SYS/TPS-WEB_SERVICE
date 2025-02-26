@@ -19,7 +19,7 @@ public class App {
     private static JTextArea resultArea;
 
     public static void main(String[] args) {
-        client = new Client("http://localhost/api.php");
+        client = new Client("http://localhost/web-service/API.php");
 
         // Creazione della finestra
         JFrame frame = new JFrame("Concessionario Client");
@@ -102,33 +102,36 @@ public class App {
         // Azioni dei pulsanti
         getCarsButton.addActionListener(e -> execute(() -> {
             try {
-                client.getCars();
+                client.getCars(); // Chiama e lascia che Client gestisca tutto
             } catch (Exception e1) {
-                // TODO Auto-generated catch block
+                resultArea.setText("Errore: " + e1.getMessage());
                 e1.printStackTrace();
             }
         }));
+
         getBrandsButton.addActionListener(e -> execute(() -> {
             try {
                 client.getBrands();
             } catch (Exception e1) {
-                // TODO Auto-generated catch block
+                resultArea.setText("Errore: " + e1.getMessage());
                 e1.printStackTrace();
             }
         }));
+
         getCustomersButton.addActionListener(e -> execute(() -> {
             try {
                 client.getCustomers();
             } catch (Exception e1) {
-                // TODO Auto-generated catch block
+                resultArea.setText("Errore: " + e1.getMessage());
                 e1.printStackTrace();
             }
         }));
+
         getCarsWithDetailsButton.addActionListener(e -> execute(() -> {
             try {
                 client.getCarsWithDetails();
             } catch (Exception e1) {
-                // TODO Auto-generated catch block
+                resultArea.setText("Errore: " + e1.getMessage());
                 e1.printStackTrace();
             }
         }));
@@ -144,18 +147,13 @@ public class App {
                     try {
                         client.createCar(model, brandId, year, price, color);
                     } catch (Exception e1) {
-                        // TODO Auto-generated catch block
+                        resultArea.setText("Errore: " + e1.getMessage());
                         e1.printStackTrace();
                     }
                 });
-                // Pulisci i campi dopo l'operazione
-                createModelField.setText("");
-                createBrandIdField.setText("");
-                createYearField.setText("");
-                createPriceField.setText("");
-                createColorField.setText("");
+                clearFields(createModelField, createBrandIdField, createYearField, createPriceField, createColorField);
             } catch (NumberFormatException ex) {
-                resultArea.setText("Errore: Inserisci valori numerici validi per Brand ID, Year e Price.");
+                resultArea.setText("Inserisci valori numerici validi per Brand ID, Year e Price.");
             }
         });
 
@@ -169,14 +167,11 @@ public class App {
                     try {
                         client.updateCar(id, model, price, color);
                     } catch (Exception e1) {
-                        // TODO Auto-generated catch block
+                        resultArea.setText("Errore: " + e1.getMessage());
                         e1.printStackTrace();
                     }
                 });
-                updateIdField.setText("");
-                updateModelField.setText("");
-                updatePriceField.setText("");
-                updateColorField.setText("");
+                clearFields(updateIdField, updateModelField, updatePriceField, updateColorField);
             } catch (NumberFormatException ex) {
                 resultArea.setText("Errore: Inserisci un ID e un Price validi.");
             }
@@ -189,7 +184,7 @@ public class App {
                     try {
                         client.deleteCar(id);
                     } catch (Exception e1) {
-                        // TODO Auto-generated catch block
+                        resultArea.setText("Errore: " + e1.getMessage());
                         e1.printStackTrace();
                     }
                 });
@@ -199,14 +194,12 @@ public class App {
             }
         });
 
-        // Mostra la finestra
         frame.setVisible(true);
     }
 
     // Metodo per eseguire le operazioni e catturare l'output
     private static void execute(Runnable operation) {
         try {
-            // Reindirizza System.out a resultArea
             JTextAreaOutputStream outputStream = new JTextAreaOutputStream(resultArea);
             System.setOut(new java.io.PrintStream(outputStream));
             operation.run();
@@ -215,9 +208,15 @@ public class App {
             e.printStackTrace();
         }
     }
+
+    // Metodo per pulire i campi di testo
+    private static void clearFields(JTextField... fields) {
+        for (JTextField field : fields) {
+            field.setText("");
+        }
+    }
 }
 
-// Classe per reindirizzare System.out a JTextArea
 class JTextAreaOutputStream extends java.io.OutputStream {
     private JTextArea textArea;
 

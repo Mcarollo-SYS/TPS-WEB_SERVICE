@@ -50,7 +50,11 @@ public class Client {
     public Response createCar(String model, int brandId, int year, double price, String color) throws Exception {
         Car car = new Car(0, model, brandId, year, price, color);
         String body = XmlUtils.marshal(car);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUrl + "?action=createCar")).header("Content-Type", "application/xml").POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "?action=createCar"))
+                .header("Content-Type", "application/xml")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
         return NonGetRequest(request);
     }
 
@@ -58,13 +62,20 @@ public class Client {
     public Response updateCar(int id, String model, double price, String color) throws Exception {
         Car car = new Car(id, model, 0, 0, price, color);
         String body = XmlUtils.marshal(car);
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUrl + "?action=updateCar&id=" + id)).header("Content-Type", "application/xml").PUT(HttpRequest.BodyPublishers.ofString(body)).build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "?action=updateCar&id=" + id))
+                .header("Content-Type", "application/xml")
+                .PUT(HttpRequest.BodyPublishers.ofString(body))
+                .build();
         return NonGetRequest(request);
     }
 
     // DELETE: Elimina un'auto
     public Response deleteCar(int id) throws Exception {
-        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUrl + "?action=deleteCar&id=" + id)).DELETE().build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "?action=deleteCar&id=" + id))
+                .DELETE()
+                .build();
         return NonGetRequest(request);
     }
 
@@ -75,15 +86,19 @@ public class Client {
         int status = response.statusCode();
         System.out.println("Status: " + status);
 
+        // Stampa l'XML grezzo
+        String xmlResponse = response.body();
+        System.out.println("Raw XML Response:\n" + formatXml(xmlResponse));
+
         if (status >= 200 && status < 300) {
-            // Deserializza direttamente in ResponseWrapper
-            ResponseWrapper<T> wrapper = XmlUtils.unmarshal(ResponseWrapper.class, response.body());
+            // Deserializza in ResponseWrapper
+            ResponseWrapper<T> wrapper = XmlUtils.unmarshal(ResponseWrapper.class, xmlResponse);
             if (wrapper.getItems() == null || wrapper.getItems().isEmpty()) {
-                System.out.println("attenzione Nessun elementonell'XML!!!!");
+                System.out.println("Attenzione: Nessun elemento nell'XML!");
             }
             return wrapper;
         } else {
-            System.out.println("Errore: " + response.body());
+            System.out.println("Errore: " + xmlResponse);
             throw new Exception("Richiesta fallita con stato: " + status);
         }
     }
@@ -91,14 +106,23 @@ public class Client {
     // Metodo per richieste non-GET (POST, PUT, DELETE) con Response
     private Response NonGetRequest(HttpRequest request) throws Exception {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        int stat = response.statusCode();
-        System.out.println("Status: " + stat);
+        int status = response.statusCode();
+        System.out.println("Status: " + status);
 
-        if (stat >= 200 && stat < 300) {
-            return XmlUtils.unmarshal(Response.class, response.body());
+        // Stampa l'XML grezzo
+        String xmlResponse = response.body();
+        System.out.println("Raw XML Response:\n" + formatXml(xmlResponse));
+
+        if (status >= 200 && status < 300) {
+            return XmlUtils.unmarshal(Response.class, xmlResponse);
         } else {
-            System.out.println("Errore: " + response.body());
-            throw new Exception("Richiesta fallita: " + stat);
+            System.out.println("Errore: " + xmlResponse);
+            throw new Exception("Richiesta fallita: " + status);
         }
+    }
+
+    // Metodo per formattare l'XML (opzionale, per leggibilità)
+    private String formatXml(String xml) {
+        return xml.replace("><", ">\n<"); // Aggiunge a capo tra i tag
     }
 }

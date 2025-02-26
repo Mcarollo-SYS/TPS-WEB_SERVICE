@@ -37,3 +37,7 @@ INSERT INTO cars (model, brand_id, year, price, color) VALUES
 INSERT INTO customers (first_name, last_name, email, car_id) VALUES 
 ('Marco', 'Rossi', 'marco@example.com', 1), 
 ('Laura', 'Bianchi', 'laura@example.com', 2);
+
+
+--->cd /Applications/XAMPP
+---> cd xamppfiles/bin
