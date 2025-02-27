@@ -64,6 +64,23 @@ public class App {
         createPanel.add(createColorField);
         createPanel.add(createCarButton);
 
+        // Componenti per Create Customer
+        JPanel createCustomerPanel = new JPanel(new FlowLayout());
+        JTextField createFirstNameField = new JTextField(10);
+        JTextField createLastNameField = new JTextField(10);
+        JTextField createCarIdField = new JTextField(5);
+        JTextField createEmailField = new JTextField(10);
+        JButton createCustomerButton = new JButton("Create Customer");
+        createCustomerPanel.add(new JLabel("First Name:"));
+        createCustomerPanel.add(createFirstNameField);
+        createCustomerPanel.add(new JLabel("Last Name:"));
+        createCustomerPanel.add(createLastNameField);
+        createCustomerPanel.add(new JLabel("Car ID:"));
+        createCustomerPanel.add(createCarIdField);
+        createCustomerPanel.add(new JLabel("Email:"));
+        createCustomerPanel.add(createEmailField);
+        createCustomerPanel.add(createCustomerButton);
+
         // Componenti per Update Car
         JPanel updatePanel = new JPanel(new FlowLayout());
         JTextField updateIdField = new JTextField(5);
@@ -97,6 +114,7 @@ public class App {
         buttonPanel.add(createPanel);
         buttonPanel.add(updatePanel);
         buttonPanel.add(deletePanel);
+        buttonPanel.add(createCustomerPanel);
 
         frame.add(buttonPanel, BorderLayout.WEST);
 
@@ -155,6 +173,25 @@ public class App {
                 clearFields(createModelField, createBrandIdField, createYearField, createPriceField, createColorField);
             } catch (NumberFormatException ex) {
                 resultArea.setText("Inserisci valori numerici validi");
+            }
+        });
+        createCustomerButton.addActionListener(e ->{
+            try {
+                String first_name = createFirstNameField.getText();
+                String last_name = createLastNameField.getText();
+                String email = createEmailField.getText();
+                int car_id = Integer.parseInt(createCarIdField.getText());
+                execute(() -> {
+                    try {
+                        client.createCustomer(first_name, last_name,email,car_id);
+                    } catch (Exception e1) {
+                        resultArea.setText("Errore: " + e1.getMessage());
+                        e1.printStackTrace();
+                    }
+                });
+                clearFields(createFirstNameField, createLastNameField);
+            } catch (NumberFormatException ex) {
+                resultArea.setText("Errore: Inserisci valori validi");
             }
         });
 

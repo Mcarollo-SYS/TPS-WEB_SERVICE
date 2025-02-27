@@ -5,6 +5,7 @@
  * - GET ?action=getCustomers : Lista clienti
  * - GET ?action=getCarsWithDetails : Lista auto con marche e clienti
  * - POST ?action=createCar : Crea auto
+ * - POST ?action=crateCustomer : crea cliente 
  * - PUT ?action=updateCar&id={id} : Aggiorna auto
  * - DELETE ?action=deleteCar&id={id} : Elimina auto
  */
@@ -51,6 +52,7 @@ if ($method == 'GET') {
             $item->addAttribute('id', $row['id']);
             $item->addChild('first_name', htmlspecialchars($row['first_name']));
             $item->addChild('last_name', htmlspecialchars($row['last_name']));
+            $item->addChild('email', $row['email']);
             $item->addChild('car_id', $row['car_id']);
         }
         $result->free();
@@ -76,7 +78,7 @@ if ($method == 'GET') {
         $xml->addChild('error', 'Azione non valida');
         http_response_code(404);
     }
-} elseif ($method == 'POST' && $action == 'createCar') {
+} else if ($method == 'POST' && $action == 'createCar') {
     $input = simplexml_load_file("php://input");
     $model = (string)$input->model;
     $brand_id = (int)$input->brand_id;
@@ -95,7 +97,7 @@ if ($method == 'GET') {
         $xml->addChild('error', 'Campi obbligatori mancanti');
         http_response_code(400);
     }
-} elseif ($method == 'PUT' && $action == 'updateCar' && $id) {
+} else if ($method == 'PUT' && $action == 'updateCar' && $id) {
     $input = simplexml_load_file("php://input");
     $model = (string)$input->model;
     $price = (float)$input->price;
@@ -111,7 +113,7 @@ if ($method == 'GET') {
         $xml->addChild('error', 'Campo "model" obbligatorio');
         http_response_code(400);
     }
-} elseif ($method == 'DELETE' && $action == 'deleteCar' && $id) {
+} else if ($method == 'DELETE' && $action == 'deleteCar' && $id) {
     $stmt = $conn->prepare("DELETE FROM cars WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -122,9 +124,28 @@ if ($method == 'GET') {
         $xml->addChild('error', 'Auto non trovata');
         http_response_code(404);
     }
+} else if ($method == 'POST' && $action == 'createCustomer'){
+    $input = simplexml_load_file("php://input");
+    $first_name = (string)$input->first_name;
+    $last_name = (string)$input->last_name;
+    $email = (string)$input->email;
+    $car_id = (int)$input->car_id;
+
+    if ($first_name && $last_name) {
+        $stmt = $conn->prepare("INSERT INTO customers (first_name, last_name,email, car_id) VALUES (?, ?, ?,?)");
+        $stmt->bind_param("sssi", $first_name, $last_name, $email ,$car_id);
+        $stmt->execute();
+        $xml->addChild('message', 'Cliente creato');
+        $xml->addChild('id', $conn->insert_id);
+        http_response_code(201);
+    } else {
+        $xml->addChild('error', 'Campi obbligatori mancanti');
+        http_response_code(400);
+    }
 } else {
-    $xml->addChild('error', 'Metodo o azione non valida');
+    $xml->addChild('error', 'Metodo non valido');
     http_response_code(405);
+   
 }
 
 $conn->close();

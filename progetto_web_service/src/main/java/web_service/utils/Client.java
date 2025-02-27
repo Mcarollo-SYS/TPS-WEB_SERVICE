@@ -65,6 +65,15 @@ public class Client {
         return GetRequest(request);
     }
 
+    public Response createCustomer(String first_name, String last_name, String email, int car_id ) throws Exception{
+        Customer customer = new Customer(0, first_name, last_name, email, car_id);
+        String body = XmlUtils.marshal(customer);
+        //creazione richiesta HTTP
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUrl + "?action=createCustomer")).header("Content-Type", "application/xml").POST(HttpRequest.BodyPublishers.ofString(body)).build();
+        //restituisce la richiesta
+        return GetRequest(request);
+    }
+
     // PUT Aggiorna auto
     public Response updateCar(int id, String model, double price, String color) throws Exception {
         Car car = new Car(id, model, 0, 0, price, color);
