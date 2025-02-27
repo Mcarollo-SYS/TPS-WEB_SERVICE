@@ -9,15 +9,16 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "response")
 @XmlAccessorType(FIELD)
 public class Response {
+    //dichiarazione tag xml 
     @XmlElement(name = "message")
     private String message;
 
     @XmlElement(name = "id")
     private int id;
-
+    //costruttore vuoto 
     public Response() {
     }
-
+    //vari getter e setter 
     public String getMessage() {
         return message;
     }
@@ -34,6 +35,7 @@ public class Response {
         this.id = id;
     }
 
+    //metodo toString 
     @Override
     public String toString() {
         return "mes='" + message + "', id=" + id + "}";

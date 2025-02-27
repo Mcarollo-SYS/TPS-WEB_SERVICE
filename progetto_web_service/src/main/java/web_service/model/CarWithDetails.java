@@ -8,6 +8,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "item")
 @XmlAccessorType(FIELD)
 public class CarWithDetails {
+        //metodo costruttore con parametri
     public CarWithDetails(String model, int year, double price, String color, String brandName, String firstName, String lastName) {
         this.model = model;
         this.year = year;
@@ -18,6 +19,7 @@ public class CarWithDetails {
         this.last_name = lastName;
     }
 
+    //vari tag xml 
     @XmlElement(name = "model")
     private String model;
 
@@ -37,9 +39,11 @@ public class CarWithDetails {
  @XmlElement(name = "last_name")
     private String last_name;
 
+    //costruttore vuoto 
     public CarWithDetails() {    
     }
 
+    //vari getter e setter 
     public String getModel() {
         return model;
     }
@@ -96,6 +100,7 @@ public class CarWithDetails {
         this.last_name = last_name;
     }
 
+    //metodo tostring 
     @Override
     public String toString() {
         return "CarDetail{model='" + model + "', year=" + year + ", price=" + price + ", color='" + color + 

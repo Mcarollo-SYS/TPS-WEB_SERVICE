@@ -19,6 +19,7 @@ public class App {
     private static JTextArea resultArea;
 
     public static void main(String[] args) {
+        // Creazione del client
         client = new Client("http://localhost/web-service/API.php");
 
         // Creazione della finestra
@@ -41,7 +42,7 @@ public class App {
         JButton getCarsButton = new JButton("Get Cars");
         JButton getBrandsButton = new JButton("Get Brands");
         JButton getCustomersButton = new JButton("Get Customers");
-        JButton getCarsWithDetailsButton = new JButton("Get Cars with Details");
+        JButton getCarsWithDetailsButton = new JButton("Get Cars and Details");
 
         // Componenti per Create Car
         JPanel createPanel = new JPanel(new FlowLayout());
@@ -153,7 +154,7 @@ public class App {
                 });
                 clearFields(createModelField, createBrandIdField, createYearField, createPriceField, createColorField);
             } catch (NumberFormatException ex) {
-                resultArea.setText("Inserisci valori numerici validi per Brand ID, Year e Price.");
+                resultArea.setText("Inserisci valori numerici validi");
             }
         });
 
@@ -173,7 +174,7 @@ public class App {
                 });
                 clearFields(updateIdField, updateModelField, updatePriceField, updateColorField);
             } catch (NumberFormatException ex) {
-                resultArea.setText("Errore: Inserisci un ID e un Price validi.");
+                resultArea.setText("Errore: Inserisci ID,Price validi");
             }
         });
 
@@ -190,7 +191,7 @@ public class App {
                 });
                 deleteIdField.setText("");
             } catch (NumberFormatException ex) {
-                resultArea.setText("Errore: Inserisci un ID numerico valido.");
+                resultArea.setText("Errore: Inserisci ID numerico valido");
             }
         });
 
