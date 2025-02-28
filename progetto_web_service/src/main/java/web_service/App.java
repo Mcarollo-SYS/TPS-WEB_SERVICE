@@ -124,7 +124,6 @@ public class App {
                 client.getCars(); // Chiama e lascia che Client gestisca tutto
             } catch (Exception e1) {
                 resultArea.setText("Errore: " + e1.getMessage());
-                e1.printStackTrace();
             }
         }));
 
@@ -133,7 +132,6 @@ public class App {
                 client.getBrands();
             } catch (Exception e1) {
                 resultArea.setText("Errore: " + e1.getMessage());
-                e1.printStackTrace();
             }
         }));
 
@@ -142,7 +140,6 @@ public class App {
                 client.getCustomers();
             } catch (Exception e1) {
                 resultArea.setText("Errore: " + e1.getMessage());
-                e1.printStackTrace();
             }
         }));
 
@@ -151,7 +148,6 @@ public class App {
                 client.getCarsWithDetails();
             } catch (Exception e1) {
                 resultArea.setText("Errore: " + e1.getMessage());
-                e1.printStackTrace();
             }
         }));
 
@@ -167,7 +163,6 @@ public class App {
                         client.createCar(model, brandId, year, price, color);
                     } catch (Exception e1) {
                         resultArea.setText("Errore: " + e1.getMessage());
-                        e1.printStackTrace();
                     }
                 });
                 clearFields(createModelField, createBrandIdField, createYearField, createPriceField, createColorField);
@@ -186,7 +181,6 @@ public class App {
                         client.createCustomer(first_name, last_name,email,car_id);
                     } catch (Exception e1) {
                         resultArea.setText("Errore: " + e1.getMessage());
-                        e1.printStackTrace();
                     }
                 });
                 clearFields(createFirstNameField, createLastNameField);
@@ -206,7 +200,6 @@ public class App {
                         client.updateCar(id, model, price, color);
                     } catch (Exception e1) {
                         resultArea.setText("Errore: " + e1.getMessage());
-                        e1.printStackTrace();
                     }
                 });
                 clearFields(updateIdField, updateModelField, updatePriceField, updateColorField);
@@ -243,7 +236,6 @@ public class App {
             operation.run();
         } catch (Exception e) {
             resultArea.setText("Errore: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

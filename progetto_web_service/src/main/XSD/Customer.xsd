@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified"
-           targetNamespace="http://example.com/customer"
-           xmlns:tns="http://example.com/customer">
-
-    <xs:element name="item" type="tns:CustomerType"/>
-
-
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="item" type="CustomerType"/>
     <xs:complexType name="CustomerType">
         <xs:sequence>
             <xs:element name="id" type="xs:int" minOccurs="1" maxOccurs="1"/>
